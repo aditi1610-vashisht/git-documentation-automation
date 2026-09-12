@@ -1,0 +1,37 @@
+name: Generate Documentation
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  generate-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate documentation
+        run: |
+          echo "# Project Documentation" > DOCUMENTATION.md
+          echo "" >> DOCUMENTATION.md
+          echo "## Git Commit History" >> DOCUMENTATION.md
+          echo "" >> DOCUMENTATION.md
+          echo "| Date | Author | Commit Message |" >> DOCUMENTATION.md
+          echo "|------|--------|----------------|" >> DOCUMENTATION.md
+          git log --pretty=format:'| %ad | %an | %s |' --date=short >> DOCUMENTATION.md
+
+      - name: Commit documentation
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add DOCUMENTATION.md
+          git diff --cached --quiet || git commit -m "Update generated documentation"
+          git push
